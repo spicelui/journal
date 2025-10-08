@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&" />
+  <title>Diario</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- HEADER PRINCIPAL -->
+   <header>
+      <div class="supbar">
+      <div class="divsup">
+      <h1>Diario</h1>
+      <div>
+         <button id="exportBtn" title="Exportar notas"><span class="material-symbols-rounded">
+      download
+      </span></button>
+         <button id="newEntryBtn" title="Nueva entrada"><span class="material-symbols-rounded">
+      add_circle
+      </span></button>
+      </div>
+      </div>
+      <input type="text" id="searchInput" placeholder="Buscar..." />
+      </div>
+   </header>
+
+
+  <!-- ENTRADAS -->
+  <main id="entries"></main>
+
+  <!-- SHEET iOS -->
+  <div id="sheet" class="hidden">
+    <div class="sheet-content">
+      <!-- HEADER SHEET -->
+      <header class="sheet-header">
+        <button id="cancelBtn">Cancelar</button>
+        <h2 id="sheetTitle">Nueva entrada</h2>
+        <button id="saveBtn">Guardar</button>
+      </header>
+
+      <!-- CUERPO SHEET -->
+      <div class="sheet-body">
+        <input id="titleInput" type="text" placeholder="Título (opcional)" class="title">
+        <textarea id="bodyInput" placeholder="Escribe aquí..." class="textarea"></textarea>
+        <button id="deleteBtn" class="danger hidden">Eliminar entrada</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT JS -->
+  <script src="script.js"></script>
+</body>
+</html>
+
