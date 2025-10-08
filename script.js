@@ -112,7 +112,7 @@ function openSheet(entry = null) {
     titleInput.value = entry.title || '';
     bodyInput.value = entry.body;
     saveBtn.textContent = 'Actualizar';
-    sheetTitle.textContent = 'Editar entrada';
+    sheetTitle.textContent = 'Entrada';
     deleteBtn.classList.remove('hidden');
     currentId = entry.id;
   } else {
@@ -241,3 +241,17 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+titleInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    bodyInput.focus({ preventScroll: true }); // evita el scroll automático
+    bodyInput.scrollIntoView({ block: 'nearest', behavior: 'instant' }); // asegura visibilidad sin animación
+  }
+});
+
+// Obtener fecha formateada en español
+const now = new Date();
+const fechaFormateada = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+
+// Actualizar placeholder del título
+titleInput.placeholder = `${fechaFormateada}`;
