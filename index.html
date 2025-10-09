@@ -14,17 +14,27 @@
    <header>
       <div class="supbar">
       <div class="divsup">
-      <h1>Diario</h1>
-      <div>
-         <button id="exportBtn" title="Exportar notas"><span class="material-symbols-rounded">
-      download
-      </span></button>
-         <button id="newEntryBtn" title="Nueva entrada"><span class="material-symbols-rounded">
-      add_circle
-      </span></button>
+         <div>
+            <button id="exportBtn" title="Exportar notas"><span class="material-symbols-rounded">
+         download
+         </span></button>
+            <button id="newEntryBtn" title="Nueva entrada"><span class="material-symbols-rounded">
+         add_circle
+         </span></button>
+         </div>
+      </div>
+         <h1>Diario</h1>
+      
+      <!-- Contenedor input + limpiar -->
+      <div class="search-wrapper">
+         <input type="text" id="searchInput" placeholder="Buscar..." />
+         <button id="clearSearch" title="Limpiar búsqueda">
+            <span class="material-symbols-rounded tache">
+               cancel
+            </span>
+         </button>
       </div>
       </div>
-      <input type="text" id="searchInput" placeholder="Buscar..." />
       </div>
    </header>
 
@@ -44,8 +54,8 @@
 
       <!-- CUERPO SHEET -->
       <div class="sheet-body">
-        <input id="titleInput" type="text" placeholder="Título (opcional)" class="title">
-        <textarea id="bodyInput" placeholder="Escribe aquí..." class="textarea"></textarea>
+        <input id="titleInput" type="text" class="title" placeholder="Titulo" autofocus>
+        <textarea id="bodyInput" placeholder="¿Cómo te sientes hoy?" class="textarea"></textarea>
         <button id="deleteBtn" class="danger hidden">Eliminar entrada</button>
       </div>
     </div>
