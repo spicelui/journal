@@ -18,9 +18,7 @@
             <button id="exportBtn" title="Exportar notas"><span class="material-symbols-rounded">
          download
          </span></button>
-            <button id="newEntryBtn" title="Nueva entrada"><span class="material-symbols-rounded">
-         add_circle
-         </span></button>
+            <button id="newEntryBtn" title="Nueva entrada"><span class="material-symbols-rounded">add_circle</span></button>
          </div>
       </div>
          <h1>Diario</h1>
@@ -49,14 +47,18 @@
       <header class="sheet-header">
         <button id="cancelBtn">Cancelar</button>
         <h2 id="sheetTitle">Nueva entrada</h2>
-        <button id="saveBtn">Guardar</button>
+        <button id="saveBtn" style="background-color: #222; color:#fff;">Guardar</button>
       </header>
 
       <!-- CUERPO SHEET -->
       <div class="sheet-body">
         <input id="titleInput" type="text" class="title" placeholder="Titulo" autofocus>
         <textarea id="bodyInput" placeholder="¿Cómo te sientes hoy?" class="textarea"></textarea>
-        <button id="deleteBtn" class="danger hidden">Eliminar entrada</button>
+        <div class="danger-zone">
+         <button id="deleteBtn" class="danger hidden"><span class="material-symbols-rounded del">delete</span></button>
+         </button>
+        </div>
+        
       </div>
     </div>
   </div>
