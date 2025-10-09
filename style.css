@@ -121,23 +121,27 @@ p{
    padding-top: 4px;
    color: #444444;
 }
-hr {
-  border: none;
-  border-bottom: 1px solid #e0e0e0;
-  margin-top: -9px;
-  opacity: 0.7;
-}
-.entry{
-   margin-left: -16px;
+.entry {
+   margin-left: -16px; /* conserva tu margen izquierdo */
    padding-right: 30px;
 }
+
 .entry p {
-  line-height: 26px;   /* altura de línea normal */
-  margin: 0 0 32px 0;  /* espacio entre párrafos */
+   line-height: 26px;
+   margin: 0 0 32px 0;
 }
 
 .entry p br {
-  line-height: 26px;   /* saltos simples dentro de párrafo */
+   line-height: 26px;
+}
+
+/* Corregir hr que sigue a .entry */
+.entry + hr {
+   margin-left: 0px;
+   margin-right: 0;
+   border: none;
+   border-bottom: 1px solid #e0e0e0;
+   opacity: 0.7;
 }
 
 
