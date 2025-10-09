@@ -117,22 +117,18 @@ h3 {
 small{
    color: #828282;
 }
-p{
-   padding-top: 4px;
-   color: #444444;
-}
 .entry {
    margin-left: -16px; /* conserva tu margen izquierdo */
    padding-right: 30px;
 }
-
-.entry p {
-   line-height: 26px;
-   margin: 0 0 32px 0;
-}
-
-.entry p br {
-   line-height: 26px;
+.entry div {
+  display: -webkit-box;
+  -webkit-line-clamp: 5; /* 🔹 número de líneas visibles */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 20px;
+  color: #555;
 }
 
 /* Corregir hr que sigue a .entry */
