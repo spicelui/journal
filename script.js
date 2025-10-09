@@ -61,46 +61,6 @@ function getAllEntries() {
   });
 }
 
-// ==========================
-// RENDER ENTRADAS
-// ==========================
-async function renderEntries() {
-  const entries = await getAllEntries();
-  entriesContainer.innerHTML = '';
-
-  for (const e of entries) {
-    const div = document.createElement('div');
-    div.classList.add('entry');
-    div.dataset.id = e.id;
-
-    if (e.title) {
-      const title = document.createElement('h3');
-      title.textContent = e.title;
-      div.appendChild(title);
-    }
-
-    const date = document.createElement('small');
-    date.textContent = e.date;
-    div.appendChild(date);
-
-    const bodyWrapper = document.createElement('div');
-
-    // Separar doble salto de línea en párrafos <p>
-    const paragraphs = e.body
-      .split('\n\n')               // doble salto = nuevo párrafo
-      .map(p => p.replace(/\n/g, '<br>'))  // saltos simples dentro del párrafo
-      .map(p => `<p>${p}</p>`)     // envolver en <p>
-      .join('');
-   bodyWrapper.innerHTML = paragraphs;
-    div.appendChild(bodyWrapper);
-
-    // click para editar
-    div.addEventListener('click', () => openSheet(e));
-
-    entriesContainer.appendChild(div);
-    entriesContainer.appendChild(document.createElement('hr'));
-  }
-}
 
 // ==========================
 // SHEET CONTROL
@@ -301,22 +261,30 @@ async function renderEntries() {
     div.appendChild(date);
 
     const bodyWrapper = document.createElement('div');
-    bodyWrapper.dataset.rawBody = e.body; // ← guarda el texto original
+    bodyWrapper.dataset.rawBody = e.body;
 
-    // Formatear texto con saltos y párrafos
-    const paragraphs = e.body
+    const cleanBody = e.body.trim().replace(/\n{3,}/g, '\n\n');
+
+    const paragraphs = cleanBody
       .split('\n\n')
-      .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+      .map(p => p.trim()) // elimina espacios o saltos sobrantes
+      .filter(p => p.length > 0) // evita párrafos vacíos
       .join('');
+
     bodyWrapper.innerHTML = paragraphs;
     div.appendChild(bodyWrapper);
 
+    // evento abrir hoja
     div.addEventListener('click', () => openSheet(e));
 
     entriesContainer.appendChild(div);
-    entriesContainer.appendChild(document.createElement('hr'));
+
+    const hr = document.createElement('hr');
+    hr.style.margin = ' 0'; // puedes ajustar el espacio exacto aquí
+    entriesContainer.appendChild(hr);
   }
 }
+
 
 /* ---- BUSCADOR CORREGIDO ---- */
 searchInput.addEventListener('input', () => {
@@ -335,9 +303,10 @@ searchInput.addEventListener('input', () => {
       // restablecer texto normal (con saltos)
       if (titleEl) titleEl.innerHTML = escapeHtml(titleText);
       bodyEl.innerHTML = rawBody
-        .split('\n\n')
-        .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
-        .join('');
+         .split('\n\n')
+         .map(p => p.trim()) // elimina espacios o saltos sobrantes
+         .filter(p => p.length > 0) // evita párrafos vacíos
+         .join('');
       entry.style.display = '';
       if (hr) hr.style.display = '';
       return;
@@ -360,8 +329,9 @@ searchInput.addEventListener('input', () => {
       } else {
         bodyEl.innerHTML = rawBody
           .split('\n\n')
-          .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
-          .join('');
+         .map(p => p.trim()) // elimina espacios o saltos sobrantes
+         .filter(p => p.length > 0) // evita párrafos vacíos
+         .join('');
       }
     } else {
       entry.style.display = 'none';
