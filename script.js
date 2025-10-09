@@ -82,18 +82,7 @@ async function renderEntries() {
     const date = document.createElement('small');
     date.textContent = e.date;
     div.appendChild(date);
-
-    const bodyWrapper = document.createElement('div');
-
-    // Separar doble salto de línea en párrafos <p>
-    const paragraphs = e.body
-      .split('\n\n')               // doble salto = nuevo párrafo
-      .map(p => p.replace(/\n/g, '<br>'))  // saltos simples dentro del párrafo
-      .map(p => `<p>${p}</p>`)     // envolver en <p>
-      .join('');
-   bodyWrapper.innerHTML = paragraphs;
-    div.appendChild(bodyWrapper);
-
+    
     // click para editar
     div.addEventListener('click', () => openSheet(e));
 
@@ -255,3 +244,4 @@ const fechaFormateada = now.toLocaleDateString('es-MX', { day: 'numeric', month:
 
 // Actualizar placeholder del título
 titleInput.placeholder = `${fechaFormateada}`;
+
