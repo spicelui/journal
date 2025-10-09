@@ -7,8 +7,8 @@ const saveBtn = document.getElementById('saveBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 const sheetTitle = document.getElementById('sheetTitle');
 const titleInput = document.getElementById('titleInput');
-const bodyInput = document.getElementById('bodyInput');
 const entriesContainer = document.getElementById('entries');
+const searchInput = document.getElementById('searchInput');
 
 let db;
 let currentId = null;
@@ -62,33 +62,33 @@ function getAllEntries() {
 }
 
 // ==========================
-// RENDER ENTRADAS
+// RENDER ENTRADAS SIMPLIFICADO
 // ==========================
 async function renderEntries() {
   const entries = await getAllEntries();
   entriesContainer.innerHTML = '';
 
-  for (const e of entries) {
+  entries.forEach(e => {
     const div = document.createElement('div');
     div.classList.add('entry');
     div.dataset.id = e.id;
 
-    if (e.title) {
-      const title = document.createElement('h3');
-      title.textContent = e.title;
-      div.appendChild(title);
-    }
+    const title = document.createElement('h3');
+    title.textContent = e.title || 'Sin título';
+    div.appendChild(title);
 
     const date = document.createElement('small');
     date.textContent = e.date;
     div.appendChild(date);
-    
-    // click para editar
+
     div.addEventListener('click', () => openSheet(e));
 
     entriesContainer.appendChild(div);
-    entriesContainer.appendChild(document.createElement('hr'));
-  }
+
+    // hr separado y manejable
+    const hr = document.createElement('hr');
+    entriesContainer.appendChild(hr);
+  });
 }
 
 // ==========================
@@ -99,25 +99,28 @@ function openSheet(entry = null) {
 
   if (entry) {
     titleInput.value = entry.title || '';
-    bodyInput.value = entry.body;
     saveBtn.textContent = 'Actualizar';
-    sheetTitle.textContent = 'Entrada';
+    sheetTitle.textContent = 'Editar entrada';
     deleteBtn.classList.remove('hidden');
     currentId = entry.id;
   } else {
     titleInput.value = '';
-    bodyInput.value = '';
     saveBtn.textContent = 'Guardar';
     sheetTitle.textContent = 'Nueva entrada';
     deleteBtn.classList.add('hidden');
     currentId = null;
   }
+
+  // Focus confiable en Safari
+  setTimeout(() => {
+    titleInput.focus();
+    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
+  }, 50);
 }
 
 function closeSheet() {
   sheet.classList.remove('visible');
   titleInput.value = '';
-  bodyInput.value = '';
   currentId = null;
 }
 
@@ -126,16 +129,15 @@ function closeSheet() {
 // ==========================
 function saveEntry() {
   const title = titleInput.value.trim();
-  const body = bodyInput.value.trim();
-  if (!body) return alert('El cuerpo no puede estar vacío.');
+  if (!title) return alert('El título no puede estar vacío.');
 
   const now = new Date();
   const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
   if (currentId) {
-    updateEntry(currentId, { title, body, date });
+    updateEntry(currentId, { title, date });
   } else {
-    addEntry({ title, body, date });
+    addEntry({ title, date });
   }
   closeSheet();
 }
@@ -174,15 +176,10 @@ saveBtn.addEventListener('click', saveEntry);
 deleteBtn.addEventListener('click', removeEntry);
 exportBtn.addEventListener('click', exportEntries);
 
-// ================ ==========
-// PWA SERVICE WORKER
 // ==========================
-// FUNCION AUXILIAR: normalizar texto (quita acentos y pone minúsculas)
+// BUSQUEDA EN TIEMPO REAL (solo título)
 function normalizeText(text) {
-  return text
-    .normalize("NFD")        // separar acentos
-    .replace(/[\u0300-\u036f]/g, "") // eliminar acentos
-    .toLowerCase();
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 searchInput.addEventListener('input', () => {
@@ -191,15 +188,10 @@ searchInput.addEventListener('input', () => {
 
   entries.forEach(entry => {
     const titleEl = entry.querySelector('h3');
-    const bodyEl = entry.querySelector('div');
-    const hr = entry.nextElementSibling; // hr que sigue a la entrada
+    const hr = entry.nextElementSibling;
 
-    let titleText = titleEl ? titleEl.textContent : '';
-    let bodyHTML = bodyEl.innerHTML;
-
-    // Limpiar highlights previos
-    if (titleEl) titleEl.innerHTML = titleText;
-    bodyEl.innerHTML = bodyHTML.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+    let titleText = titleEl.textContent;
+    titleEl.innerHTML = titleText; // limpiar highlights previos
 
     if (!query) {
       entry.style.display = '';
@@ -207,41 +199,20 @@ searchInput.addEventListener('input', () => {
       return;
     }
 
-    const titleMatch = normalizeText(titleText).includes(query);
-    const bodyMatch = normalizeText(bodyEl.textContent).includes(query);
-
-    if (titleMatch || bodyMatch) {
+    if (normalizeText(titleText).includes(query)) {
       entry.style.display = '';
       if (hr) hr.style.display = '';
-
-      // Resaltar coincidencias
-      if (titleMatch) {
-        const regex = new RegExp(`(${query})`, 'gi');
-        titleEl.innerHTML = titleText.replace(regex, `<span class="highlight">$1</span>`);
-      }
-      if (bodyMatch) {
-        const regex = new RegExp(`(${query})`, 'gi');
-        bodyEl.innerHTML = bodyEl.textContent.replace(regex, `<span class="highlight">$1</span>`);
-      }
-
+      const regex = new RegExp(`(${query})`, 'gi');
+      titleEl.innerHTML = titleText.replace(regex, `<span class="highlight">$1</span>`);
     } else {
       entry.style.display = 'none';
       if (hr) hr.style.display = 'none';
     }
   });
 });
-titleInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    bodyInput.focus({ preventScroll: true }); // evita el scroll automático
-    bodyInput.scrollIntoView({ block: 'nearest', behavior: 'instant' }); // asegura visibilidad sin animación
-  }
-});
 
-// Obtener fecha formateada en español
+// ==========================
+// Placeholder dinámico
+// ==========================
 const now = new Date();
-const fechaFormateada = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
-
-// Actualizar placeholder del título
-titleInput.placeholder = `${fechaFormateada}`;
-
+titleInput.placeholder = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
