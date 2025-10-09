@@ -17,6 +17,10 @@ body {
 }
 
 .material-symbols-rounded {
+   display: flex;
+   align-items: center;
+   margin: 0;
+   padding: 0;
    color: #000;
    font-size: 26px;
   font-variation-settings:
@@ -25,10 +29,11 @@ body {
   'GRAD' 0,
   'opsz' 24
 }
-
+.del{
+   color:#ed372e;
+}
 .tache{
    font-size: 20px;
-   margin-top: 23.1px;
    color: #888;
 }
 header {
@@ -46,7 +51,7 @@ header {
 }
 
 header h1 {
-  margin: 0px 0px 0px 24px;
+  margin: 0px 0px 10px 24px;
   font-size: 32px;
   letter-spacing: -0.5px;
   font-weight: 700;
@@ -76,7 +81,6 @@ header input#searchInput {
   caret-color: #444;
   width: 100%;
   box-sizing: border-box;
-  margin-top: 10px;
   margin-left: 20px;
   margin-right: 20px;
   outline: none;
@@ -168,10 +172,13 @@ hr {
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  
+  transform: translateY(0%);
   opacity: 0;
+  transition: transform 0.3s cubic-bezier(0,.85,.49,1.04);
   pointer-events: none;
-  transition: opacity 0.1s ease;
   z-index: 1000;
+  
 }
 
 #sheet.visible {
@@ -181,7 +188,7 @@ hr {
 
 /* SHEET CONTENT */
 .sheet-content {
-  background: #fff;
+  background: transparent;
   width: 100%;
   height: 98%; /* casi full-screen */
   border-radius: 30px;
@@ -189,7 +196,7 @@ hr {
   flex-direction: column;
   transform: translateY(100%);
   opacity: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.4s cubic-bezier(0,1.21,.32,1), opacity 0.6s ease;
   box-shadow: 0 0px 20px rgba(0,0,0,0.1);
 }
 
@@ -224,10 +231,10 @@ hr {
 .sheet-header button {
   font-size: 16px;
   font-weight: 450;
-  color: var(--primary-color);
+  color:#444;
   background: #f6f6f6;
   padding: 10px 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   border: none;
   outline: none;
   cursor: pointer;
@@ -242,7 +249,7 @@ hr {
   overflow-y: auto;
   opacity: 0;
   background-color: transparent;
-  transition: opacity 0s ease;
+  transition: opacity 0.1s ease;
 }
 
 #sheet.visible .sheet-body {
@@ -279,7 +286,7 @@ input, textarea {
 .textarea {
    background-color: #fff;
    box-sizing: border-box;
-  height: 420px;
+  height: 100%;
   padding: 10px;
   border-radius: 10px;
   font-size: 17.5px;
@@ -287,19 +294,22 @@ input, textarea {
   color:#464646
 }
 
-/* BOTÓN ELIMINAR */
 .danger {
+   position: absolute;
   color: var(--danger-color);
-  margin-bottom: 30px;
+  margin-bottom: 50px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 17px;
   font-weight: 450;
   margin-top: auto;
   padding: 18px;
-  border-radius: 18px;
-  background: #fcf7f7;
-  border: none;
-  cursor: pointer;
+  border-radius: 50%;
+  background: #ffeaeab7;
+  bottom: 0;
+  backdrop-filter: blur(10px);
 }
 
 /* SCROLL SUAVE */
@@ -338,16 +348,18 @@ input, textarea {
 
 #clearSearch {
   position: absolute;
-  right: 24px; /* dentro del input */
-  top: 50%;
-  transform: translateY(-50%);
+  padding: 0px;
+  margin: 0;
+  right: 34px; 
   font-size: 20px;
   color: #888;
   cursor: pointer;
   display: none; /* se muestra solo si hay texto */
   user-select: none;
 }
-
-#clearSearch:hover {
-  color: #333;
+.danger-zone{
+   width: 100%;
+   box-sizing: border-box;
+   display: flex;
+   justify-content: center;
 }
