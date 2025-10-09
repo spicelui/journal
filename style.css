@@ -26,6 +26,11 @@ body {
   'opsz' 24
 }
 
+.tache{
+   font-size: 20px;
+   margin-top: 23.1px;
+   color: #888;
+}
 header {
   display: flex;
   position: sticky;
@@ -34,15 +39,16 @@ header {
   padding: 8px;
   padding-top: 20px;
   padding-bottom: 0px;
-  background: #ffffffb6;
+  background: #ffffff61;
   top: 0;               /* pegado al top */
   z-index: 100;         /* encima del contenido */
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(12px);
 }
 
 header h1 {
   margin: 0px 0px 0px 24px;
-  font-size: 24px;
+  font-size: 32px;
+  letter-spacing: -0.5px;
   font-weight: 700;
 }
 
@@ -55,30 +61,37 @@ input, textarea {
   caret-color: #333;
 }
 header div {
-  display: flex;
-  gap: 0.5rem;
-  margin-right:4px;
+   margin: 0;
+   margin-left: auto;
+   display: flex;
+   gap: 0.5rem;
+   margin-right:14px;
 }
 header input#searchInput {
   font-size: 16px;
-  background-color: #f6f6f6;
-  padding: 14px 24px;
+  background-color: #00000006;
   border-radius: 14px;
   border: none;
   color: #000000;
   caret-color: #444;
-  width: 92%;
+  width: 100%;
   box-sizing: border-box;
   margin-top: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
   outline: none;
-  margin-left: 16px;
   flex: 1;
+}
+p{
+   padding-top: 0;
+   margin: 0;
 }
 .divsup{
    display: flex;
    width: 100%;
    box-sizing: border-box;
    justify-content: space-between;
+   margin: 0;
 }
 .highlight {
   background-color: rgb(255, 244, 211);
@@ -91,6 +104,9 @@ header input#searchInput {
    justify-content: space-between;
    display: flex;
    flex-direction: column;
+   margin: 0;
+   background-color: transparent;
+   padding-bottom: 10px ;
 }
 button {
   font-size: 1.4rem;
@@ -116,6 +132,7 @@ h3 {
 }
 small{
    color: #828282;
+   margin-bottom: 0;
 }
 .entry {
    margin-left: -16px; /* conserva tu margen izquierdo */
@@ -126,13 +143,13 @@ small{
   -webkit-line-clamp: 5; /* 🔹 número de líneas visibles */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: "ellipsis";
   margin-bottom: 20px;
   color: #555;
 }
 
 /* Corregir hr que sigue a .entry */
-.entry + hr {
+hr {
    margin-left: 0px;
    margin-right: 0;
    border: none;
@@ -297,4 +314,40 @@ input, textarea {
 
 .sheet-body::-webkit-scrollbar-track {
   background: transparent;
+}
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.search-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
+  background-color: #f6f6f6;
+  padding: 12px 24px;
+  border-radius: 14px;
+  border: none;
+  color: #000;
+  caret-color: #444;
+  outline: none;
+}
+
+#clearSearch {
+  position: absolute;
+  right: 24px; /* dentro del input */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+  display: none; /* se muestra solo si hay texto */
+  user-select: none;
+}
+
+#clearSearch:hover {
+  color: #333;
 }
