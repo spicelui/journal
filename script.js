@@ -7,8 +7,8 @@ const saveBtn = document.getElementById('saveBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 const sheetTitle = document.getElementById('sheetTitle');
 const titleInput = document.getElementById('titleInput');
+const bodyInput = document.getElementById('bodyInput');
 const entriesContainer = document.getElementById('entries');
-const searchInput = document.getElementById('searchInput');
 
 let db;
 let currentId = null;
@@ -62,33 +62,44 @@ function getAllEntries() {
 }
 
 // ==========================
-// RENDER ENTRADAS SIMPLIFICADO
+// RENDER ENTRADAS
 // ==========================
 async function renderEntries() {
   const entries = await getAllEntries();
   entriesContainer.innerHTML = '';
 
-  entries.forEach(e => {
+  for (const e of entries) {
     const div = document.createElement('div');
     div.classList.add('entry');
     div.dataset.id = e.id;
 
-    const title = document.createElement('h3');
-    title.textContent = e.title || 'Sin título';
-    div.appendChild(title);
+    if (e.title) {
+      const title = document.createElement('h3');
+      title.textContent = e.title;
+      div.appendChild(title);
+    }
 
     const date = document.createElement('small');
     date.textContent = e.date;
     div.appendChild(date);
 
+    const bodyWrapper = document.createElement('div');
+
+    // Separar doble salto de línea en párrafos <p>
+    const paragraphs = e.body
+      .split('\n\n')               // doble salto = nuevo párrafo
+      .map(p => p.replace(/\n/g, '<br>'))  // saltos simples dentro del párrafo
+      .map(p => `<p>${p}</p>`)     // envolver en <p>
+      .join('');
+   bodyWrapper.innerHTML = paragraphs;
+    div.appendChild(bodyWrapper);
+
+    // click para editar
     div.addEventListener('click', () => openSheet(e));
 
     entriesContainer.appendChild(div);
-
-    // hr separado y manejable
-    const hr = document.createElement('hr');
-    entriesContainer.appendChild(hr);
-  });
+    entriesContainer.appendChild(document.createElement('hr'));
+  }
 }
 
 // ==========================
@@ -99,28 +110,25 @@ function openSheet(entry = null) {
 
   if (entry) {
     titleInput.value = entry.title || '';
+    bodyInput.value = entry.body;
     saveBtn.textContent = 'Actualizar';
-    sheetTitle.textContent = 'Editar entrada';
+    sheetTitle.textContent = 'Entrada';
     deleteBtn.classList.remove('hidden');
     currentId = entry.id;
   } else {
     titleInput.value = '';
+    bodyInput.value = '';
     saveBtn.textContent = 'Guardar';
     sheetTitle.textContent = 'Nueva entrada';
     deleteBtn.classList.add('hidden');
     currentId = null;
   }
-
-  // Focus confiable en Safari
-  setTimeout(() => {
-    titleInput.focus();
-    titleInput.setSelectionRange(titleInput.value.length, titleInput.value.length);
-  }, 50);
 }
 
 function closeSheet() {
   sheet.classList.remove('visible');
   titleInput.value = '';
+  bodyInput.value = '';
   currentId = null;
 }
 
@@ -129,15 +137,16 @@ function closeSheet() {
 // ==========================
 function saveEntry() {
   const title = titleInput.value.trim();
-  if (!title) return alert('El título no puede estar vacío.');
+  const body = bodyInput.value.trim();
+  if (!body) return alert('El cuerpo no puede estar vacío.');
 
   const now = new Date();
   const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
   if (currentId) {
-    updateEntry(currentId, { title, date });
+    updateEntry(currentId, { title, body, date });
   } else {
-    addEntry({ title, date });
+    addEntry({ title, body, date });
   }
   closeSheet();
 }
@@ -176,10 +185,15 @@ saveBtn.addEventListener('click', saveEntry);
 deleteBtn.addEventListener('click', removeEntry);
 exportBtn.addEventListener('click', exportEntries);
 
+// ================ ==========
+// PWA SERVICE WORKER
 // ==========================
-// BUSQUEDA EN TIEMPO REAL (solo título)
+// FUNCION AUXILIAR: normalizar texto (quita acentos y pone minúsculas)
 function normalizeText(text) {
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return text
+    .normalize("NFD")        // separar acentos
+    .replace(/[\u0300-\u036f]/g, "") // eliminar acentos
+    .toLowerCase();
 }
 
 searchInput.addEventListener('input', () => {
@@ -188,10 +202,15 @@ searchInput.addEventListener('input', () => {
 
   entries.forEach(entry => {
     const titleEl = entry.querySelector('h3');
-    const hr = entry.nextElementSibling;
+    const bodyEl = entry.querySelector('div');
+    const hr = entry.nextElementSibling; // hr que sigue a la entrada
 
-    let titleText = titleEl.textContent;
-    titleEl.innerHTML = titleText; // limpiar highlights previos
+    let titleText = titleEl ? titleEl.textContent : '';
+    let bodyHTML = bodyEl.innerHTML;
+
+    // Limpiar highlights previos
+    if (titleEl) titleEl.innerHTML = titleText;
+    bodyEl.innerHTML = bodyHTML.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
 
     if (!query) {
       entry.style.display = '';
@@ -199,20 +218,40 @@ searchInput.addEventListener('input', () => {
       return;
     }
 
-    if (normalizeText(titleText).includes(query)) {
+    const titleMatch = normalizeText(titleText).includes(query);
+    const bodyMatch = normalizeText(bodyEl.textContent).includes(query);
+
+    if (titleMatch || bodyMatch) {
       entry.style.display = '';
       if (hr) hr.style.display = '';
-      const regex = new RegExp(`(${query})`, 'gi');
-      titleEl.innerHTML = titleText.replace(regex, `<span class="highlight">$1</span>`);
+
+      // Resaltar coincidencias
+      if (titleMatch) {
+        const regex = new RegExp(`(${query})`, 'gi');
+        titleEl.innerHTML = titleText.replace(regex, `<span class="highlight">$1</span>`);
+      }
+      if (bodyMatch) {
+        const regex = new RegExp(`(${query})`, 'gi');
+        bodyEl.innerHTML = bodyEl.textContent.replace(regex, `<span class="highlight">$1</span>`);
+      }
+
     } else {
       entry.style.display = 'none';
       if (hr) hr.style.display = 'none';
     }
   });
 });
+titleInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    bodyInput.focus({ preventScroll: true }); // evita el scroll automático
+    bodyInput.scrollIntoView({ block: 'nearest', behavior: 'instant' }); // asegura visibilidad sin animación
+  }
+});
 
-// ==========================
-// Placeholder dinámico
-// ==========================
+// Obtener fecha formateada en español
 const now = new Date();
-titleInput.placeholder = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+const fechaFormateada = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+
+// Actualizar placeholder del título
+titleInput.placeholder = `${fechaFormateada}`;
