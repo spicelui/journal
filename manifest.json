@@ -1,10 +1,8 @@
 {
-  "name": "Diario",
-  "short_name": "Diario",
+  "name": "Journal",
+  "short_name": "Journal",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icon.jpg",
@@ -18,3 +16,4 @@
     }
   ]
 }
+
