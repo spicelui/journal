@@ -195,7 +195,130 @@ function normalizeText(text) {
     .replace(/[\u0300-\u036f]/g, "") // eliminar acentos
     .toLowerCase();
 }
+/* ---- HELPERS ---- */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
+// Construye cadena normalizada (sin diacríticos) y mapa de índices
+function buildNormMap(orig) {
+  let norm = '';
+  const map = [];
+  for (let i = 0; i < orig.length; i++) {
+    const ch = orig[i];
+    const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    for (let k = 0; k < decomposed.length; k++) {
+      map.push(i);
+    }
+    norm += decomposed;
+  }
+  return { norm, map };
+}
+
+/**
+ * highlightTextPreserveNewlines(raw, query, wrapParagraphs)
+ * - raw: texto original (con \n)
+ * - query: texto de búsqueda (puede contener acentos)
+ * - wrapParagraphs: si true envuelve cada bloque en <p>...</p>
+ * Devuelve HTML seguro con <span class="highlight">...</span> en coincidencias.
+ */
+function highlightTextPreserveNewlines(raw, query, wrapParagraphs = false) {
+  raw = raw || '';
+  query = (query || '').trim();
+  // Si no hay query, solo formatea y escapa
+  if (!query) {
+    if (!wrapParagraphs) return escapeHtml(raw).replace(/\n/g, '<br>');
+    return raw
+      .split('\n\n')
+      .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+      .join('');
+  }
+
+  const qNorm = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const paragraphs = raw.split('\n\n');
+  const outParagraphs = [];
+
+  for (const p of paragraphs) {
+    const { norm, map } = buildNormMap(p);
+    const normLower = norm.toLowerCase();
+
+    // buscar todas las coincidencias (no solapadas) en la cadena normalizada
+    const matches = [];
+    let startPos = 0;
+    while (true) {
+      const idx = normLower.indexOf(qNorm, startPos);
+      if (idx === -1) break;
+      const origStart = map[idx];
+      const origEnd = map[idx + qNorm.length - 1] + 1; // exclusive
+      matches.push([origStart, origEnd]);
+      startPos = idx + qNorm.length;
+    }
+
+    if (matches.length === 0) {
+      outParagraphs.push(`<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`);
+      continue;
+    }
+
+    // construir HTML escapado con spans en posiciones originales
+    let out = '';
+    let last = 0;
+    for (const [s, e] of matches) {
+      out += escapeHtml(p.slice(last, s)).replace(/\n/g, '<br>');
+      out += `<span class="highlight">${escapeHtml(p.slice(s, e)).replace(/\n/g, '<br>')}</span>`;
+      last = e;
+    }
+    out += escapeHtml(p.slice(last)).replace(/\n/g, '<br>');
+    outParagraphs.push(`<p>${out}</p>`);
+  }
+
+  if (!wrapParagraphs) return outParagraphs.join('');
+  return outParagraphs.join('');
+}
+
+/* ---- RENDER ENTRADAS (continuación) ---- */
+async function renderEntries() {
+  const entries = await getAllEntries();
+  entriesContainer.innerHTML = '';
+
+  for (const e of entries) {
+    const div = document.createElement('div');
+    div.classList.add('entry');
+    div.dataset.id = e.id;
+
+    if (e.title) {
+      const title = document.createElement('h3');
+      title.textContent = e.title;
+      div.appendChild(title);
+    }
+
+    const date = document.createElement('small');
+    date.textContent = e.date;
+    div.appendChild(date);
+
+    const bodyWrapper = document.createElement('div');
+    bodyWrapper.dataset.rawBody = e.body; // ← guarda el texto original
+
+    // Formatear texto con saltos y párrafos
+    const paragraphs = e.body
+      .split('\n\n')
+      .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+      .join('');
+    bodyWrapper.innerHTML = paragraphs;
+    div.appendChild(bodyWrapper);
+
+    div.addEventListener('click', () => openSheet(e));
+
+    entriesContainer.appendChild(div);
+    entriesContainer.appendChild(document.createElement('hr'));
+  }
+}
+
+/* ---- BUSCADOR CORREGIDO ---- */
 searchInput.addEventListener('input', () => {
   const query = normalizeText(searchInput.value.trim());
   const entries = document.querySelectorAll('#entries .entry');
@@ -203,55 +326,46 @@ searchInput.addEventListener('input', () => {
   entries.forEach(entry => {
     const titleEl = entry.querySelector('h3');
     const bodyEl = entry.querySelector('div');
-    const hr = entry.nextElementSibling; // hr que sigue a la entrada
+    const hr = entry.nextElementSibling;
 
-    let titleText = titleEl ? titleEl.textContent : '';
-    let bodyHTML = bodyEl.innerHTML;
-
-    // Limpiar highlights previos
-    if (titleEl) titleEl.innerHTML = titleText;
-    bodyEl.innerHTML = bodyHTML.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+    const rawBody = bodyEl.dataset.rawBody || bodyEl.textContent;
+    const titleText = titleEl ? titleEl.textContent : '';
 
     if (!query) {
+      // restablecer texto normal (con saltos)
+      if (titleEl) titleEl.innerHTML = escapeHtml(titleText);
+      bodyEl.innerHTML = rawBody
+        .split('\n\n')
+        .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+        .join('');
       entry.style.display = '';
       if (hr) hr.style.display = '';
       return;
     }
 
     const titleMatch = normalizeText(titleText).includes(query);
-    const bodyMatch = normalizeText(bodyEl.textContent).includes(query);
+    const bodyMatch = normalizeText(rawBody).includes(query);
 
     if (titleMatch || bodyMatch) {
       entry.style.display = '';
       if (hr) hr.style.display = '';
 
-      // Resaltar coincidencias
-      if (titleMatch) {
+      if (titleEl && titleMatch) {
         const regex = new RegExp(`(${query})`, 'gi');
-        titleEl.innerHTML = titleText.replace(regex, `<span class="highlight">$1</span>`);
-      }
-      if (bodyMatch) {
-        const regex = new RegExp(`(${query})`, 'gi');
-        bodyEl.innerHTML = bodyEl.textContent.replace(regex, `<span class="highlight">$1</span>`);
+        titleEl.innerHTML = escapeHtml(titleText).replace(regex, `<span class="highlight">$1</span>`);
       }
 
+      if (bodyMatch) {
+        bodyEl.innerHTML = highlightTextPreserveNewlines(rawBody, query, true);
+      } else {
+        bodyEl.innerHTML = rawBody
+          .split('\n\n')
+          .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+          .join('');
+      }
     } else {
       entry.style.display = 'none';
       if (hr) hr.style.display = 'none';
     }
   });
 });
-titleInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    bodyInput.focus({ preventScroll: true }); // evita el scroll automático
-    bodyInput.scrollIntoView({ block: 'nearest', behavior: 'instant' }); // asegura visibilidad sin animación
-  }
-});
-
-// Obtener fecha formateada en español
-const now = new Date();
-const fechaFormateada = now.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
-
-// Actualizar placeholder del título
-titleInput.placeholder = `${fechaFormateada}`;
