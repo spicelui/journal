@@ -104,24 +104,34 @@ function saveEntry() {
   const editedDate = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
   if (currentId) {
-    // Obtener la entrada original
-    const tx = db.transaction("entries", "readonly");
+    // transacción readwrite para obtener y actualizar
+    const tx = db.transaction("entries", "readwrite");
     const store = tx.objectStore("entries");
+
     const req = store.get(currentId);
     req.onsuccess = () => {
       const original = req.result;
-      updateEntry(currentId, { 
-        title, 
-        body, 
-        date: original.date,        // mantener fecha original
-        editedDate                  // nueva propiedad
-      });
+      // mantener fecha original y añadir fecha de edición
+      const updatedEntry = {
+        ...original,
+        title,
+        body,
+        editedDate
+      };
+      store.put(updatedEntry);
     };
+
+    tx.oncomplete = () => {
+      renderEntries();
+      closeSheet();
+    };
+    tx.onerror = e => console.error("Error al actualizar", e);
+
   } else {
     const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
     addEntry({ title, body, date });
+    closeSheet();
   }
-  closeSheet();
 }
 
 // ==========================
@@ -353,5 +363,6 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
 
 
