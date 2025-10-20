@@ -271,6 +271,9 @@ async function renderEntries() {
 
     const date = document.createElement('small');
     date.textContent = e.date;
+    if (e.editedDate) {
+      date.textContent += ` (Editado el ${e.editedDate})`;
+    }
     div.appendChild(date);
 
     const bodyWrapper = document.createElement('div');
@@ -280,24 +283,22 @@ async function renderEntries() {
 
     const paragraphs = cleanBody
       .split('\n\n')
-      .map(p => p.trim()) // elimina espacios o saltos sobrantes
-      .filter(p => p.length > 0) // evita párrafos vacíos
+      .map(p => p.trim())
+      .filter(p => p.length > 0)
       .join('');
 
     bodyWrapper.innerHTML = paragraphs;
     div.appendChild(bodyWrapper);
 
-    // evento abrir hoja
     div.addEventListener('click', () => openSheet(e));
 
     entriesContainer.appendChild(div);
 
     const hr = document.createElement('hr');
-    hr.style.margin = ' 0'; // puedes ajustar el espacio exacto aquí
+    hr.style.margin = '0';
     entriesContainer.appendChild(hr);
   }
 }
-
 
 /* ---- BUSCADOR CORREGIDO ---- */
 searchInput.addEventListener('input', () => {
@@ -352,4 +353,5 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
 
