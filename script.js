@@ -104,28 +104,24 @@ function saveEntry() {
   const editedDate = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
   if (currentId) {
-    // transacción readwrite para obtener y actualizar
     const tx = db.transaction("entries", "readwrite");
     const store = tx.objectStore("entries");
 
+    // obtener la entrada
     const req = store.get(currentId);
     req.onsuccess = () => {
       const original = req.result;
-      // mantener fecha original y añadir fecha de edición
-      const updatedEntry = {
-        ...original,
-        title,
-        body,
-        editedDate
-      };
-      store.put(updatedEntry);
-    };
+      const updatedEntry = { ...original, title, body, editedDate };
 
-    tx.oncomplete = () => {
-      renderEntries();
-      closeSheet();
+      // actualizar la entrada
+      const putReq = store.put(updatedEntry);
+      putReq.onsuccess = () => {
+        renderEntries();
+        closeSheet();
+      };
+      putReq.onerror = e => console.error("Error al actualizar la entrada", e);
     };
-    tx.onerror = e => console.error("Error al actualizar", e);
+    req.onerror = e => console.error("Error al leer la entrada", e);
 
   } else {
     const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
@@ -363,6 +359,7 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
 
 
 
