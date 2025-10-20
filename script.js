@@ -101,11 +101,24 @@ function saveEntry() {
   if (!body) return alert('El cuerpo no puede estar vacío.');
 
   const now = new Date();
-  const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+  const editedDate = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 
   if (currentId) {
-    updateEntry(currentId, { title, body, date });
+    // Obtener la entrada original
+    const tx = db.transaction("entries", "readonly");
+    const store = tx.objectStore("entries");
+    const req = store.get(currentId);
+    req.onsuccess = () => {
+      const original = req.result;
+      updateEntry(currentId, { 
+        title, 
+        body, 
+        date: original.date,        // mantener fecha original
+        editedDate                  // nueva propiedad
+      });
+    };
   } else {
+    const date = now.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
     addEntry({ title, body, date });
   }
   closeSheet();
@@ -339,3 +352,4 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
