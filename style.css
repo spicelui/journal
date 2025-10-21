@@ -47,7 +47,7 @@ header {
   background: #ffffff61;
   top: 0;               /* pegado al top */
   z-index: 100;         /* encima del contenido */
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(60px);
 }
 
 header h1 {
