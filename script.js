@@ -91,6 +91,18 @@ function closeSheet() {
   bodyInput.value = '';
   currentId = null;
 }
+// ==========================
+// DELETE ALL
+// ==========================
+function clearAllEntries() {
+  if (confirm('¿Estás seguro que quieres borrar todas las notas? Esta acción no se puede deshacer.')) {
+    const tx = db.transaction("entries", "readwrite");
+    const store = tx.objectStore("entries");
+    store.clear();
+    tx.oncomplete = () => renderEntries();
+    tx.onerror = e => console.error("Error al borrar todas las entradas", e);
+  }
+}
 
 // ==========================
 // GUARDAR / ACTUALIZAR
@@ -405,9 +417,5 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
-
-
-
-
-
-
+const clearAllBtn = document.getElementById('clearAllBtn');
+clearAllBtn.addEventListener('click', clearAllEntries);
