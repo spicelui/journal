@@ -126,19 +126,20 @@ button {
 ========================================= */
 main {
   padding: 0px 0px 0px 50px;
-  font-size: 17px;
+  font-size: 1.06rem;
   line-height: 26px;
 }
 
 h3 {
   margin: 0;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 1.07rem;
    color: #333333;
 }
 small{
    color: #828282;
    margin-bottom: 0;
+   font-size: 0.9rem;
 }
 .entry {
    margin-top: 13px;
@@ -225,7 +226,7 @@ hr {
 .sheet-header h2 {
   margin: 0;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 1.06rem;
   text-align: center;
   flex: 1;
   color: #111;
