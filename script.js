@@ -176,11 +176,13 @@ importFile.addEventListener('change', async (e) => {
     const tx = db.transaction('entries', 'readwrite');
     const store = tx.objectStore('entries');
 
-    for (const note of data) {
-      // borrar ID para evitar conflictos
+    // agregar en orden invertido para que las más recientes queden arriba
+    for (let i = data.length - 1; i >= 0; i--) {
+      const note = data[i];
       delete note.id;
       store.add(note);
     }
+
 
     tx.oncomplete = () => {
       alert('✅ Notas importadas correctamente');
@@ -403,6 +405,7 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
 
 
 
