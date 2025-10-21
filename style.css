@@ -47,7 +47,7 @@ header {
   background: #ffffff61;
   top: 0;               /* pegado al top */
   z-index: 100;         /* encima del contenido */
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px);
 }
 
 header h1 {
@@ -373,7 +373,7 @@ input, textarea {
    .del { color: #ed372e; }
    .tache { color: #888; }
 
-   header { background: #12121280; }
+   header { background: #121212b4; }
    header input#searchInput {
    background-color: #ffffff07;
    color: #ffffff;
