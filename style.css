@@ -22,7 +22,7 @@ body {
    margin: 0;
    padding: 0;
    color: #000;
-   font-size: 26px;
+   font-size: 1.6rem;
   font-variation-settings:
   'FILL' 1,
   'wght' 400,
@@ -52,7 +52,7 @@ header {
 
 header h1 {
   margin: 0px 0px 10px 24px;
-  font-size: 32px;
+  font-size: 1.99rem;
   letter-spacing: -0.5px;
   font-weight: 700;
 }
@@ -64,16 +64,17 @@ textarea::placeholder {
 }
 input, textarea {
   caret-color: #333;
+  font-size: 1rem;
 }
 header div {
-   margin: 0;
-   margin-left: auto;
-   display: flex;
-   gap: 0.5rem;
-   margin-right:14px;
+  margin: 0;
+  margin-left: auto;
+  display: flex;
+  gap: 0.4rem;
+  margin-right:14px;
 }
 header input#searchInput {
-  font-size: 16px;
+  font-size: 1rem;
   background-color: #00000006;
   border-radius: 14px;
   border: none;
@@ -89,6 +90,7 @@ header input#searchInput {
 p{
    padding-top: 0;
    margin: 0;
+   font-size: 1rem;
 }
 .divsup{
    display: flex;
@@ -113,7 +115,7 @@ p{
    padding-bottom: 10px ;
 }
 button {
-  font-size: 17px;
+  font-size: 1rem;
   border: none;
   background: none;
   cursor: pointer;
