@@ -154,6 +154,50 @@ async function exportEntries() {
   a.click();
   URL.revokeObjectURL(url);
 }
+// --- IMPORTAR JSON DE NOTAS ---
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+
+importBtn.addEventListener('click', () => importFile.click());
+
+importFile.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (!Array.isArray(data)) {
+      alert('El archivo no contiene un formato válido de notas.');
+      return;
+    }
+
+    const tx = db.transaction('entries', 'readwrite');
+    const store = tx.objectStore('entries');
+
+    for (const note of data) {
+      // borrar ID para evitar conflictos
+      delete note.id;
+      store.add(note);
+    }
+
+    tx.oncomplete = () => {
+      alert('✅ Notas importadas correctamente');
+      renderEntries();
+    };
+
+    tx.onerror = (e) => {
+      console.error('Error al importar notas:', e);
+      alert('❌ Ocurrió un error al importar las notas.');
+    };
+  } catch (err) {
+    alert('❌ Error al leer el archivo JSON.');
+    console.error(err);
+  } finally {
+    e.target.value = ''; // reinicia el input para permitir volver a importar
+  }
+});
 
 // ==========================
 // EVENTOS
@@ -359,6 +403,7 @@ searchInput.addEventListener('input', () => {
     }
   });
 });
+
 
 
 
